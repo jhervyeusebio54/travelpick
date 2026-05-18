@@ -1,0 +1,100 @@
+[ {
+  "id" : 159091,
+  "name" : "Tourism in Poland",
+  "description" : "Tourism in Poland is a relatively small sector of the country's economy. Poland is a growing part of the global tourism market with a steadily increasing number of visitors. The...",
+  "country" : "Poland",
+  "rating" : 4.840000000000001,
+  "popularity" : 94,
+  "group_id" : 1,
+  "imageUrl" : "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Wawel_castle.jpg/960px-Wawel_castle.jpg",
+  "estimatedCost" : "Varies by itinerary",
+  "bestSeason" : "Check local seasonality"
+}, {
+  "id" : 157602,
+  "name" : "Tourism in Scotland",
+  "description" : "Scotland is a well-developed tourist destination, with tourism generally being responsible for sustaining 200,000 jobs mainly in the service sector, with tourist spending averag...",
+  "country" : "Scotland",
+  "rating" : 4.87,
+  "popularity" : 95,
+  "group_id" : 1,
+  "imageUrl" : "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Tourists_posing_at_the_National_Monument_of_Scotland.jpg/960px-Tourists_posing_at_the_National_Monument_of_Scotland.jpg",
+  "estimatedCost" : "Varies by itinerary",
+  "bestSeason" : "Check local seasonality"
+}, {
+  "id" : 159610,
+  "name" : "Tourism in Norway",
+  "description" : "As of 2019, Norway ranks 22nd in the World Economic Forum's Travel and Tourism Competitiveness Report. Tourism in Norway contributed 4.2% of the gross domestic product as report...",
+  "country" : "Norway",
+  "rating" : 4.8100000000000005,
+  "popularity" : 93,
+  "group_id" : 1,
+  "imageUrl" : "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Geiranger2.JPG/960px-Geiranger2.JPG",
+  "estimatedCost" : "Varies by itinerary",
+  "bestSeason" : "Check local seasonality"
+}, {
+  "id" : 8636267,
+  "name" : "Tourism in China",
+  "description" : "Tourism in China is a growing industry that is becoming a significant part of the Chinese economy. The rate of tourism has expanded over the last few decades since the beginning...",
+  "country" : "China",
+  "rating" : 4.78,
+  "popularity" : 92,
+  "group_id" : 2,
+  "imageUrl" : "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Shanghai_-_Skyline_Sunset_0057.jpg/960px-Shanghai_-_Skyline_Sunset_0057.jpg",
+  "estimatedCost" : "Varies by itinerary",
+  "bestSeason" : "Check local seasonality"
+}, {
+  "id" : 159610,
+  "name" : "Tourism in Norway",
+  "description" : "As of 2019, Norway ranks 22nd in the World Economic Forum's Travel and Tourism Competitiveness Report. Tourism in Norway contributed 4.2% of the gross domestic product as report...",
+  "country" : "Norway",
+  "rating" : 4.8100000000000005,
+  "popularity" : 93,
+  "group_id" : 2,
+  "imageUrl" : "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Geiranger2.JPG/960px-Geiranger2.JPG",
+  "estimatedCost" : "Varies by itinerary",
+  "bestSeason" : "Check local seasonality"
+}, {
+  "id" : 10744760,
+  "name" : "Tourism in Nicaragua",
+  "description" : "Tourism in Nicaragua has grown considerably recently, and it is now the second largest industry in the nation. Nicaraguan President Daniel Ortega has stated his intention to use...",
+  "country" : "Nicaragua has grown considerably recently",
+  "rating" : 4.75,
+  "popularity" : 91,
+  "group_id" : 2,
+  "imageUrl" : "https://upload.wikimedia.org/wikipedia/commons/6/66/Ometepe_nic.jpg",
+  "estimatedCost" : "Varies by itinerary",
+  "bestSeason" : "Check local seasonality"
+}, {
+  "id" : 159091,
+  "name" : "Tourism in Poland",
+  "description" : "Tourism in Poland is a relatively small sector of the country's economy. Poland is a growing part of the global tourism market with a steadily increasing number of visitors. The...",
+  "country" : "Poland",
+  "rating" : 4.840000000000001,
+  "popularity" : 94,
+  "group_id" : 3,
+  "imageUrl" : "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Wawel_castle.jpg/960px-Wawel_castle.jpg",
+  "estimatedCost" : "Varies by itinerary",
+  "bestSeason" : "Check local seasonality"
+}, {
+  "id" : 157602,
+  "name" : "Tourism in Scotland",
+  "description" : "Scotland is a well-developed tourist destination, with tourism generally being responsible for sustaining 200,000 jobs mainly in the service sector, with tourist spending averag...",
+  "country" : "Scotland",
+  "rating" : 4.87,
+  "popularity" : 95,
+  "group_id" : 3,
+  "imageUrl" : "https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Tourists_posing_at_the_National_Monument_of_Scotland.jpg/960px-Tourists_posing_at_the_National_Monument_of_Scotland.jpg",
+  "estimatedCost" : "Varies by itinerary",
+  "bestSeason" : "Check local seasonality"
+}, {
+  "id" : 283772,
+  "name" : "Tourism in India",
+  "description" : "Tourism in India is 4.6% of the country's gross domestic product (GDP). Unlike other sectors, tourism is not a priority sector for the Government of India. The World Travel and...",
+  "country" : "India",
+  "rating" : 4.9,
+  "popularity" : 96,
+  "group_id" : 3,
+  "imageUrl" : null,
+  "estimatedCost" : "Varies by itinerary",
+  "bestSeason" : "Check local seasonality"
+} ]

@@ -1,0 +1,25 @@
+[ {
+  "id" : 1,
+  "name" : "test1",
+  "code" : "TRVL-4462",
+  "privacy" : "private",
+  "owner_user_id" : 2,
+  "member_user_ids" : [ 2, 3 ],
+  "created_at" : "2026-05-18T07:35:30.640926500Z"
+}, {
+  "id" : 2,
+  "name" : "test2",
+  "code" : "TRVL-9514",
+  "privacy" : "private",
+  "owner_user_id" : 2,
+  "member_user_ids" : [ 2, 3 ],
+  "created_at" : "2026-05-18T07:38:32.808831900Z"
+}, {
+  "id" : 3,
+  "name" : "test3",
+  "code" : "TRVL-1046",
+  "privacy" : "private",
+  "owner_user_id" : 2,
+  "member_user_ids" : [ 2, 3 ],
+  "created_at" : "2026-05-18T08:28:55.584760200Z"
+} ]

@@ -1,0 +1,79 @@
+[
+  {
+    "id": 1,
+    "username": "Guest",
+    "email": null,
+    "password": null,
+    "group_id": null,
+    "group_code": null,
+    "group_role": null,
+    "created_at": "2026-05-18T10:00:00Z",
+    "last_login": null
+  },
+  {
+    "id": 2,
+    "username": "john123",
+    "email": "john@email.com",
+    "password": "sha256:BASE64_SALT:BASE64_DIGEST",
+    "group_id": 10,
+    "group_code": "TRVL-4821",
+    "group_role": "owner",
+    "created_at": "2026-05-18T10:00:00Z",
+    "last_login": "2026-05-18T12:30:00Z"
+  },
+  {
+    "id": 3,
+    "username": "jane_doe",
+    "email": "jane@email.com",
+    "password": "sha256:BASE64_SALT:BASE64_DIGEST",
+    "group_id": 10,
+    "group_code": "TRVL-4821",
+    "group_role": "member",
+    "created_at": "2026-05-18T10:15:00Z",
+    "last_login": "2026-05-18T12:45:00Z"
+  },
+  {
+    "id": 4,
+    "username": "alice_smith",
+    "email": "alice@email.com",
+    "password": "sha256:BASE64_SALT:BASE64_DIGEST",
+    "group_id": 10,
+    "group_code": "TRVL-4821",
+    "group_role": "member",
+    "created_at": "2026-05-18T10:20:00Z",
+    "last_login": "2026-05-18T13:00:00Z"
+  },
+  {
+    "id": 5,
+    "username": "bob_jones",
+    "email": "bob@email.com",
+    "password": "sha256:BASE64_SALT:BASE64_DIGEST",
+    "group_id": 11,
+    "group_code": "TRVL-5932",
+    "group_role": "owner",
+    "created_at": "2026-05-18T11:00:00Z",
+    "last_login": "2026-05-18T11:45:00Z"
+  },
+  {
+    "id": 6,
+    "username": "carol_white",
+    "email": "carol@email.com",
+    "password": "sha256:BASE64_SALT:BASE64_DIGEST",
+    "group_id": 11,
+    "group_code": "TRVL-5932",
+    "group_role": "member",
+    "created_at": "2026-05-18T11:05:00Z",
+    "last_login": "2026-05-18T11:50:00Z"
+  },
+  {
+    "id": 7,
+    "username": "david_brown",
+    "email": "david@email.com",
+    "password": "sha256:BASE64_SALT:BASE64_DIGEST",
+    "group_id": null,
+    "group_code": null,
+    "group_role": null,
+    "created_at": "2026-05-18T11:30:00Z",
+    "last_login": "2026-05-18T11:35:00Z"
+  }
+]

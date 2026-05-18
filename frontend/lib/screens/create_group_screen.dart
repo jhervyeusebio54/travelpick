@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../models/destination.dart';
@@ -6,6 +8,7 @@ import '../services/api_service.dart';
 import '../theme.dart';
 import '../widgets/animated_reveal.dart';
 import '../widgets/app_page_route.dart';
+import '../widgets/confirm_action_dialog.dart';
 import 'destination_card.dart';
 import 'group_code_dialog.dart';
 import 'my_groups_screen.dart';
@@ -31,20 +34,22 @@ class CreateGroupScreen extends StatefulWidget {
 class _CreateGroupScreenState extends State<CreateGroupScreen> {
   final _groupNameController = TextEditingController();
   final _searchController = TextEditingController();
-  late final Future<List<Destination>> _destinationsFuture;
+  late Future<List<Destination>> _destinationsFuture;
   final Set<int> _selectedDestinationIds = {};
+  final Map<int, Destination> _selectedDestinationsById = {};
   PrivacyMode _privacyMode = PrivacyMode.private;
   String _query = '';
   bool _isCreating = false;
   bool _headerScrolled = false;
   bool _headerVisible = true;
+  Timer? _searchDebounce;
   late final ScrollController _scrollController;
   double _lastScrollOffset = 0;
 
   @override
   void initState() {
     super.initState();
-    _destinationsFuture = ApiService.instance.fetchDestinations(forceAll: true);
+    _destinationsFuture = ApiService.instance.searchDestinations();
     _scrollController = ScrollController()..addListener(_handleScroll);
   }
 
@@ -52,6 +57,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
   void dispose() {
     _scrollController.removeListener(_handleScroll);
     _scrollController.dispose();
+    _searchDebounce?.cancel();
     _groupNameController.dispose();
     _searchController.dispose();
     super.dispose();
@@ -97,8 +103,10 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     setState(() {
       if (_selectedDestinationIds.contains(destination.id)) {
         _selectedDestinationIds.remove(destination.id);
+        _selectedDestinationsById.remove(destination.id);
       } else {
         _selectedDestinationIds.add(destination.id);
+        _selectedDestinationsById[destination.id] = destination;
       }
     });
 
@@ -115,13 +123,11 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     );
   }
 
-  Future<void> _createGroup(List<Destination> destinations) async {
+  Future<void> _createGroup() async {
     final groupName = _groupNameController.text.trim();
-    final selectedDestinations = destinations
-        .where(
-          (destination) => _selectedDestinationIds.contains(destination.id),
-        )
-        .toList(growable: false);
+    final selectedDestinations = _selectedDestinationsById.values.toList(
+      growable: false,
+    );
 
     if (groupName.isEmpty) {
       _showMessage('Name your travel group first.');
@@ -130,6 +136,16 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
 
     if (selectedDestinations.isEmpty) {
       _showMessage('Add at least one destination to the group.');
+      return;
+    }
+
+    final confirmed = await showConfirmActionDialog(
+      context: context,
+      title: 'Create group?',
+      message: 'Are you sure you want to create "$groupName"?',
+      confirmLabel: 'Create',
+    );
+    if (confirmed != true || !mounted) {
       return;
     }
 
@@ -159,6 +175,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     _searchController.clear();
     setState(() {
       _selectedDestinationIds.clear();
+      _selectedDestinationsById.clear();
       _privacyMode = PrivacyMode.private;
       _query = '';
     });
@@ -184,6 +201,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
       _searchController.clear();
       setState(() {
         _selectedDestinationIds.clear();
+        _selectedDestinationsById.clear();
         _privacyMode = PrivacyMode.private;
         _query = '';
       });
@@ -192,7 +210,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     Navigator.of(context).pop();
   }
 
-  Widget _buildActionButtons(List<Destination> destinations) {
+  Widget _buildActionButtons() {
     return Row(
       children: [
         Expanded(
@@ -205,7 +223,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         const SizedBox(width: 12),
         Expanded(
           child: ElevatedButton.icon(
-            onPressed: _isCreating ? null : () => _createGroup(destinations),
+            onPressed: _isCreating ? null : _createGroup,
             icon: _isCreating
                 ? const SizedBox(
                     width: 18,
@@ -220,13 +238,14 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
     );
   }
 
-  Widget _buildBody(BuildContext context, AsyncSnapshot<List<Destination>> snapshot) {
+  Widget _buildBody(
+    BuildContext context,
+    AsyncSnapshot<List<Destination>> snapshot,
+  ) {
     final destinations = snapshot.data ?? const <Destination>[];
-    final selectedDestinations = destinations
-        .where(
-          (destination) => _selectedDestinationIds.contains(destination.id),
-        )
-        .toList(growable: false);
+    final selectedDestinations = _selectedDestinationsById.values.toList(
+      growable: false,
+    );
     final filteredDestinations = _filteredDestinations(destinations);
 
     return Column(
@@ -259,40 +278,37 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
               widget.embedded ? 20 : 24,
             ),
             children: [
-                AnimatedReveal(
-                  delay: const Duration(milliseconds: 90),
-                  child: _GroupSetupSection(
-                    groupNameController: _groupNameController,
-                    privacyMode: _privacyMode,
-                    onPrivacyChanged: (mode) {
-                      setState(() => _privacyMode = mode);
-                    },
-                  ),
+              AnimatedReveal(
+                delay: const Duration(milliseconds: 90),
+                child: _GroupSetupSection(
+                  groupNameController: _groupNameController,
+                  privacyMode: _privacyMode,
+                  onPrivacyChanged: (mode) {
+                    setState(() => _privacyMode = mode);
+                  },
                 ),
-                const SizedBox(height: 18),
-                AnimatedReveal(
-                  delay: const Duration(milliseconds: 150),
-                  child: _DestinationSelectionSection(
-                    searchController: _searchController,
-                    selectedDestinations: selectedDestinations,
-                    destinations: filteredDestinations,
-                    isLoading:
-                        snapshot.connectionState == ConnectionState.waiting,
-                    onSearchChanged: (value) {
-                      setState(() => _query = value);
-                    },
-                    onRemoveSelected: _toggleDestination,
-                    onToggleDestination: _toggleDestination,
-                    isSelected: (destination) =>
-                        _selectedDestinationIds.contains(destination.id),
-                  ),
+              ),
+              const SizedBox(height: 18),
+              AnimatedReveal(
+                delay: const Duration(milliseconds: 150),
+                child: _DestinationSelectionSection(
+                  searchController: _searchController,
+                  selectedDestinations: selectedDestinations,
+                  destinations: filteredDestinations,
+                  isLoading: snapshot.connectionState == ConnectionState.waiting,
+                  onSearchChanged: _handleDestinationSearch,
+                  onRemoveSelected: _toggleDestination,
+                  onToggleDestination: _toggleDestination,
+                  isSelected: (destination) =>
+                      _selectedDestinationIds.contains(destination.id),
                 ),
-                if (widget.embedded) ...[
-                  const SizedBox(height: 20),
-                  if (snapshot.hasData) _buildActionButtons(destinations),
-                  const SizedBox(height: 8),
-                ],
+              ),
+              if (widget.embedded) ...[
+                const SizedBox(height: 20),
+                _buildActionButtons(),
+                const SizedBox(height: 8),
               ],
+            ],
           ),
         ),
       ],
@@ -320,10 +336,7 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
         child: FutureBuilder<List<Destination>>(
           future: _destinationsFuture,
           builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const SizedBox.shrink();
-            }
-            return _buildActionButtons(snapshot.data!);
+            return _buildActionButtons();
           },
         ),
       ),
@@ -343,6 +356,20 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
               destination.description.toLowerCase().contains(normalizedQuery);
         })
         .toList(growable: false);
+  }
+
+  void _handleDestinationSearch(String value) {
+    setState(() => _query = value);
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 450), () {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _destinationsFuture = ApiService.instance.searchDestinations(_query);
+      });
+    });
   }
 }
 

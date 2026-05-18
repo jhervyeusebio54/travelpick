@@ -1,8 +1,7 @@
-import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/auth_user.dart';
+import 'api_service.dart';
 
 class AuthException implements Exception {
   AuthException(this.message);
@@ -13,35 +12,16 @@ class AuthException implements Exception {
   String toString() => message;
 }
 
-class _StoredAccount {
-  _StoredAccount({
-    required this.id,
-    required this.name,
-    required this.email,
-    required this.password,
-  });
-
-  final String id;
-  final String name;
-  final String email;
-  final String password;
-
-  AuthUser toUser() => AuthUser(id: id, name: name, email: email);
-}
-
+/// Session state only — credentials and profiles live in backend users.json.
 class AuthService {
   AuthService._();
 
   static final AuthService instance = AuthService._();
 
   static const _keyUserId = 'user_id';
-  static const _keyEmail = 'email';
-  static const _keyName = 'name';
   static const _keySaveAccount = 'save_account';
-  static const _keyAccounts = 'mock_accounts';
 
   SharedPreferences? _prefs;
-  final Map<String, _StoredAccount> _accountsByEmail = {};
   AuthUser? _currentUser;
 
   AuthUser? get currentUser => _currentUser;
@@ -50,8 +30,6 @@ class AuthService {
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
-    await _loadAccounts();
-    _seedDemoAccount();
   }
 
   Future<AuthUser?> tryRestoreSession() async {
@@ -61,18 +39,21 @@ class AuthService {
     }
 
     final userId = prefs.getString(_keyUserId);
-    final email = prefs.getString(_keyEmail);
-    if (userId == null || email == null) {
+    if (userId == null) {
       return null;
     }
 
-    final account = _accountsByEmail[email.toLowerCase()];
-    if (account == null || account.id != userId) {
+    final parsedId = int.tryParse(userId);
+    if (parsedId == null) {
       return null;
     }
 
-    _currentUser = account.toUser();
-    return _currentUser;
+    try {
+      _currentUser = await _loadProfileFromBackend(parsedId);
+      return _currentUser;
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<AuthUser> signIn({
@@ -80,15 +61,18 @@ class AuthService {
     required String password,
     required bool saveAccount,
   }) async {
-    await Future<void>.delayed(const Duration(milliseconds: 420));
-    final normalizedEmail = email.trim().toLowerCase();
-    final account = _accountsByEmail[normalizedEmail];
-
-    if (account == null || account.password != password) {
+    try {
+      final profile = await ApiService.instance.login(
+        email: email.trim(),
+        password: password,
+      );
+      _currentUser = await _hydrateUserProfile(AuthUser.fromProfile(profile));
+    } on StateError catch (error) {
+      throw AuthException(error.message);
+    } catch (_) {
       throw AuthException('Invalid email or password.');
     }
 
-    _currentUser = account.toUser();
     if (saveAccount) {
       await _persistSession(_currentUser!);
     } else {
@@ -101,27 +85,90 @@ class AuthService {
     required String name,
     required String email,
     required String password,
+    String? groupCode,
+    bool saveAccount = true,
   }) async {
-    await Future<void>.delayed(const Duration(milliseconds: 520));
     final normalizedEmail = email.trim().toLowerCase();
+    final trimmedName = name.trim();
 
-    if (_accountsByEmail.containsKey(normalizedEmail)) {
-      throw AuthException('An account with this email already exists.');
+    if (trimmedName.isEmpty || normalizedEmail.isEmpty || !normalizedEmail.contains('@')) {
+      throw AuthException('Invalid input');
+    }
+    if (password.length < 6) {
+      throw AuthException('Invalid input');
     }
 
-    final account = _StoredAccount(
-      id: 'user-${DateTime.now().millisecondsSinceEpoch}',
-      name: name.trim(),
-      email: normalizedEmail,
-      password: password,
+    try {
+      final profile = await ApiService.instance.registerAccount(
+        name: trimmedName,
+        email: normalizedEmail,
+        password: password,
+        groupCode: groupCode,
+      );
+      _currentUser = await _hydrateUserProfile(AuthUser.fromProfile(profile));
+    } on StateError catch (error) {
+      if (_isSignupBusinessError(error.message)) {
+        throw AuthException(_friendlySignupError(error.message));
+      }
+      throw AuthException('Unable to create account. Is the backend running?');
+    } catch (error) {
+      if (error is AuthException) {
+        rethrow;
+      }
+      throw AuthException('Unable to create account. Is the backend running?');
+    }
+
+    if (saveAccount) {
+      await _persistSession(_currentUser!);
+    } else {
+      await _clearPersistedSession();
+    }
+    return _currentUser!;
+  }
+
+  Future<void> updateProfileGroup({
+    int? groupId,
+    String? groupCode,
+    String? groupName,
+    String? groupRole,
+  }) async {
+    final user = _currentUser;
+    if (user == null || user.isGuest) {
+      return;
+    }
+
+    _currentUser = user.copyWith(
+      groupId: groupId,
+      groupCode: groupCode,
+      groupName: groupName,
+      groupRole: groupRole,
     );
-    _accountsByEmail[normalizedEmail] = account;
-    await _saveAccounts();
-    return account.toUser();
+
+    if (_prefs?.getBool(_keySaveAccount) == true && _currentUser != null) {
+      await _persistSession(_currentUser!);
+    }
+  }
+
+  Future<void> refreshFromBackend() async {
+    final user = _currentUser;
+    if (user == null || user.isGuest) {
+      return;
+    }
+    final userId = int.tryParse(user.id);
+    if (userId == null) {
+      return;
+    }
+    try {
+      _currentUser = await _loadProfileFromBackend(userId);
+      if (_prefs?.getBool(_keySaveAccount) == true && _currentUser != null) {
+        await _persistSession(_currentUser!);
+      }
+    } catch (_) {
+      // Keep last known session if API is temporarily unavailable.
+    }
   }
 
   Future<AuthUser> continueAsGuest() async {
-    await Future<void>.delayed(const Duration(milliseconds: 180));
     _currentUser = AuthUser(
       id: 'guest-${DateTime.now().millisecondsSinceEpoch}',
       name: 'Explorer',
@@ -146,10 +193,7 @@ class AuthService {
     if (prefs == null || user.isGuest) {
       return;
     }
-
     await prefs.setString(_keyUserId, user.id);
-    await prefs.setString(_keyEmail, user.email);
-    await prefs.setString(_keyName, user.name);
     await prefs.setBool(_keySaveAccount, true);
   }
 
@@ -158,73 +202,53 @@ class AuthService {
     if (prefs == null) {
       return;
     }
-
     await prefs.remove(_keyUserId);
-    await prefs.remove(_keyEmail);
-    await prefs.remove(_keyName);
     await prefs.setBool(_keySaveAccount, false);
   }
 
-  void _seedDemoAccount() {
-    const email = 'demo@travelpick.com';
-    if (_accountsByEmail.containsKey(email)) {
-      return;
-    }
-
-    _accountsByEmail[email] = _StoredAccount(
-      id: 'user-demo',
-      name: 'Demo Traveler',
-      email: email,
-      password: 'demo123',
-    );
-    _saveAccounts();
+  Future<AuthUser> _loadProfileFromBackend(int userId) async {
+    final profile = await ApiService.instance.fetchUserProfile(userId);
+    return _hydrateUserProfile(AuthUser.fromProfile(profile));
   }
 
-  Future<void> _loadAccounts() async {
-    final prefs = _prefs;
-    if (prefs == null) {
-      return;
+  Future<AuthUser> _hydrateUserProfile(AuthUser user) async {
+    if (user.groupId == null) {
+      return user;
     }
-
-    final raw = prefs.getString(_keyAccounts);
-    if (raw == null || raw.isEmpty) {
-      return;
-    }
-
     try {
-      final decoded = jsonDecode(raw) as List<dynamic>;
-      for (final entry in decoded) {
-        final map = entry as Map<String, dynamic>;
-        final account = _StoredAccount(
-          id: map['id'] as String,
-          name: map['name'] as String,
-          email: map['email'] as String,
-          password: map['password'] as String,
-        );
-        _accountsByEmail[account.email] = account;
+      final group = await ApiService.instance.fetchGroupById(user.groupId!);
+      if (group == null) {
+        return user;
       }
+      return user.copyWith(
+        groupCode: group['code'] as String? ?? user.groupCode,
+        groupName: group['name'] as String? ?? user.groupName,
+      );
     } catch (_) {
-      // Ignore corrupt storage and re-seed on next save.
+      return user;
     }
   }
 
-  Future<void> _saveAccounts() async {
-    final prefs = _prefs;
-    if (prefs == null) {
-      return;
+  static bool _isSignupBusinessError(String message) {
+    return message.contains('User already exists') ||
+        message.contains('Group not found') ||
+        message.contains('Invalid input') ||
+        message.contains('already assigned');
+  }
+
+  static String _friendlySignupError(String message) {
+    if (message.contains('User already exists')) {
+      return 'User already exists';
     }
-
-    final payload = _accountsByEmail.values
-        .map(
-          (account) => {
-            'id': account.id,
-            'name': account.name,
-            'email': account.email,
-            'password': account.password,
-          },
-        )
-        .toList(growable: false);
-
-    await prefs.setString(_keyAccounts, jsonEncode(payload));
+    if (message.contains('Group not found')) {
+      return 'Group not found';
+    }
+    if (message.contains('already assigned')) {
+      return 'You are already assigned to another group';
+    }
+    if (message.contains('Invalid input')) {
+      return 'Invalid input';
+    }
+    return message;
   }
 }

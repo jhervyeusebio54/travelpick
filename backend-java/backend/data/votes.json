@@ -1,0 +1,154 @@
+[ {
+  "id" : 1,
+  "weight" : 3,
+  "group_id" : 1,
+  "user_id" : 2,
+  "destination_id" : 159091,
+  "created_at" : "2026-05-18T07:35:43.211382300Z",
+  "updated_at" : "2026-05-18T07:35:43.211382300Z",
+  "destination_name" : null
+}, {
+  "id" : 2,
+  "weight" : 2,
+  "group_id" : 1,
+  "user_id" : 2,
+  "destination_id" : 157602,
+  "created_at" : "2026-05-18T07:35:43.242864300Z",
+  "updated_at" : "2026-05-18T07:35:43.242864300Z",
+  "destination_name" : null
+}, {
+  "id" : 3,
+  "weight" : 1,
+  "group_id" : 1,
+  "user_id" : 2,
+  "destination_id" : 159610,
+  "created_at" : "2026-05-18T07:35:43.274715700Z",
+  "updated_at" : "2026-05-18T07:35:43.274715700Z",
+  "destination_name" : null
+}, {
+  "id" : 4,
+  "weight" : 2,
+  "group_id" : 1,
+  "user_id" : 3,
+  "destination_id" : 159091,
+  "created_at" : "2026-05-18T07:36:37.262261400Z",
+  "updated_at" : "2026-05-18T07:36:37.262261400Z",
+  "destination_name" : null
+}, {
+  "id" : 5,
+  "weight" : 1,
+  "group_id" : 1,
+  "user_id" : 3,
+  "destination_id" : 157602,
+  "created_at" : "2026-05-18T07:36:37.306914700Z",
+  "updated_at" : "2026-05-18T07:36:37.306914700Z",
+  "destination_name" : null
+}, {
+  "id" : 6,
+  "weight" : 3,
+  "group_id" : 1,
+  "user_id" : 3,
+  "destination_id" : 159610,
+  "created_at" : "2026-05-18T07:36:37.332634400Z",
+  "updated_at" : "2026-05-18T07:36:37.332634400Z",
+  "destination_name" : null
+}, {
+  "id" : 7,
+  "weight" : 3,
+  "group_id" : 2,
+  "user_id" : 2,
+  "destination_id" : 8636267,
+  "created_at" : "2026-05-18T07:38:44.471416300Z",
+  "updated_at" : "2026-05-18T07:38:44.471416300Z",
+  "destination_name" : null
+}, {
+  "id" : 8,
+  "weight" : 2,
+  "group_id" : 2,
+  "user_id" : 2,
+  "destination_id" : 159610,
+  "created_at" : "2026-05-18T07:38:44.499441800Z",
+  "updated_at" : "2026-05-18T07:38:44.499441800Z",
+  "destination_name" : null
+}, {
+  "id" : 9,
+  "weight" : 3,
+  "group_id" : 2,
+  "user_id" : 2,
+  "destination_id" : 10744760,
+  "created_at" : "2026-05-18T07:38:44.527628400Z",
+  "updated_at" : "2026-05-18T07:38:44.527628400Z",
+  "destination_name" : null
+}, {
+  "id" : 10,
+  "weight" : 3,
+  "group_id" : 2,
+  "user_id" : 3,
+  "destination_id" : 8636267,
+  "created_at" : "2026-05-18T07:39:21.286605Z",
+  "updated_at" : "2026-05-18T07:39:21.286605Z",
+  "destination_name" : null
+}, {
+  "id" : 11,
+  "weight" : 1,
+  "group_id" : 2,
+  "user_id" : 3,
+  "destination_id" : 159610,
+  "created_at" : "2026-05-18T07:39:21.312134900Z",
+  "updated_at" : "2026-05-18T07:39:21.312134900Z",
+  "destination_name" : null
+}, {
+  "id" : 12,
+  "weight" : 1,
+  "group_id" : 2,
+  "user_id" : 3,
+  "destination_id" : 10744760,
+  "created_at" : "2026-05-18T07:39:21.333899100Z",
+  "updated_at" : "2026-05-18T07:39:21.333899100Z",
+  "destination_name" : null
+}, {
+  "id" : 13,
+  "weight" : 3,
+  "group_id" : 3,
+  "user_id" : 2,
+  "destination_id" : 159091,
+  "created_at" : "2026-05-18T08:29:06.840285300Z",
+  "updated_at" : "2026-05-18T08:29:06.840285300Z",
+  "destination_name" : null
+}, {
+  "id" : 14,
+  "weight" : 1,
+  "group_id" : 3,
+  "user_id" : 2,
+  "destination_id" : 283772,
+  "created_at" : "2026-05-18T08:29:06.867324100Z",
+  "updated_at" : "2026-05-18T08:29:06.867324100Z",
+  "destination_name" : null
+}, {
+  "id" : 15,
+  "weight" : 2,
+  "group_id" : 3,
+  "user_id" : 3,
+  "destination_id" : 159091,
+  "created_at" : "2026-05-18T08:30:09.551892300Z",
+  "updated_at" : "2026-05-18T08:30:09.551892300Z",
+  "destination_name" : null
+}, {
+  "id" : 16,
+  "weight" : 2,
+  "group_id" : 3,
+  "user_id" : 3,
+  "destination_id" : 157602,
+  "created_at" : "2026-05-18T08:30:09.574208600Z",
+  "updated_at" : "2026-05-18T08:30:09.574208600Z",
+  "destination_name" : null
+}, {
+  "id" : 17,
+  "weight" : 2,
+  "group_id" : 3,
+  "user_id" : 3,
+  "destination_id" : 283772,
+  "created_at" : "2026-05-18T08:30:09.608940500Z",
+  "updated_at" : "2026-05-18T08:30:09.608940500Z",
+  "destination_name" : null
+} ]

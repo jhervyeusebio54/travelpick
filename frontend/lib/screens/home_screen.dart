@@ -5,6 +5,7 @@ import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../theme.dart';
 import '../widgets/app_page_route.dart';
+import '../widgets/confirm_action_dialog.dart';
 import 'create_group_screen.dart';
 import 'destination_list.dart';
 import 'my_groups_screen.dart';
@@ -77,7 +78,42 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    await ApiService.instance.joinGroup(code);
+    final groupInfo = await ApiService.instance.fetchGroupByCode(code);
+    if (!mounted) {
+      return;
+    }
+
+    if (groupInfo == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Group not found. Check the code and try again.')),
+      );
+      return;
+    }
+
+    final groupName = groupInfo['name'] as String? ?? 'this group';
+    final groupCode = groupInfo['code'] as String? ?? code;
+    final confirmed = await showConfirmActionDialog(
+      context: context,
+      title: 'Join group?',
+      message: 'Are you sure you want to join "$groupName" ($groupCode)?',
+      confirmLabel: 'Join',
+    );
+    if (confirmed != true || !mounted) {
+      return;
+    }
+
+    try {
+      await ApiService.instance.joinGroup(code);
+    } on StateError catch (error) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.message)),
+      );
+      return;
+    }
+
     if (!mounted) {
       return;
     }
@@ -138,6 +174,15 @@ class _HomeScreenState extends State<HomeScreen> {
                               user.email,
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
+                          if (user != null && !user.isGuest && user.groups.isNotEmpty) ...[
+                            const SizedBox(height: 4),
+                            ...user.groups.map((g) {
+                              return Text(
+                                '• Group ID: ${g.groupId} (${g.role})',
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              );
+                            }),
+                          ]
                         ],
                       ),
                     ),

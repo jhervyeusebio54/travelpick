@@ -37,8 +37,9 @@ class _VotingScreenState extends State<VotingScreen> {
   /// Compute live stat entries using only user's local votes.
   List<StatEntry> _buildStatEntries(List<Destination> destinations) {
     return destinations.map((destination) {
-      final localScore =
-          _votedIds.contains(destination.id) ? _weights[destination.id] ?? 2 : 0;
+      final localScore = _votedIds.contains(destination.id)
+          ? _weights[destination.id] ?? 2
+          : 0;
       return StatEntry(
         destination: destination,
         localScore: localScore,
@@ -64,14 +65,38 @@ class _VotingScreenState extends State<VotingScreen> {
 
     final user = ApiService.instance.activeUser;
     final votes = destinations
-        .map((destination) => Vote(
-              userId: user.id,
-              destinationId: destination.id,
-              weight: _weights[destination.id] ?? 2,
-            ))
+        .where((destination) => _votedIds.contains(destination.id))
+        .map(
+          (destination) => Vote(
+            userId: user.id,
+            destinationId: destination.id,
+            weight: _weights[destination.id] ?? 2,
+          ),
+        )
         .toList(growable: false);
+    if (votes.isEmpty) {
+      setState(() => _isSubmitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Choose at least one destination first.')),
+      );
+      return;
+    }
 
-    await ApiService.instance.submitVote(votes);
+    try {
+      // Set the destinations being voted on so results can use them
+      ApiService.instance.setVotingDestinations(destinations);
+      await ApiService.instance.submitVote(votes);
+    } catch (_) {
+      if (!mounted) return;
+
+      setState(() => _isSubmitting = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Votes could not be saved. Check the backend server.'),
+        ),
+      );
+      return;
+    }
 
     if (!mounted) return;
 
@@ -156,10 +181,7 @@ class _VotingScreenState extends State<VotingScreen> {
                               style: Theme.of(context).textTheme.titleLarge,
                             ),
                             const SizedBox(width: 10),
-                            _CountPill(
-                              current: votedCount,
-                              total: totalCount,
-                            ),
+                            _CountPill(current: votedCount, total: totalCount),
                           ],
                         ),
                       ),
@@ -250,18 +272,16 @@ class _VotingScreenState extends State<VotingScreen> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _HeaderPanel extends StatelessWidget {
-  const _HeaderPanel({
-    required this.votedCount,
-    required this.totalCount,
-  });
+  const _HeaderPanel({required this.votedCount, required this.totalCount});
 
   final int votedCount;
   final int totalCount;
 
   @override
   Widget build(BuildContext context) {
-    final progress =
-        totalCount == 0 ? 0.0 : (votedCount / totalCount).clamp(0, 1).toDouble();
+    final progress = totalCount == 0
+        ? 0.0
+        : (votedCount / totalCount).clamp(0, 1).toDouble();
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -279,7 +299,10 @@ class _HeaderPanel extends StatelessWidget {
                   color: AppTheme.coral.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(15),
                 ),
-                child: const Icon(Icons.how_to_vote_rounded, color: AppTheme.coral),
+                child: const Icon(
+                  Icons.how_to_vote_rounded,
+                  color: AppTheme.coral,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -292,7 +315,9 @@ class _HeaderPanel extends StatelessWidget {
                     ),
                     Text(
                       'Vote for your preferred destinations. Your choices are saved temporarily until submitted.',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 12),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(fontSize: 12),
                     ),
                   ],
                 ),
@@ -304,17 +329,21 @@ class _HeaderPanel extends StatelessWidget {
           // Vote counter (dynamic)
           Row(
             children: [
-              const Icon(Icons.check_circle_outline_rounded, size: 16, color: AppTheme.teal),
+              const Icon(
+                Icons.check_circle_outline_rounded,
+                size: 16,
+                color: AppTheme.teal,
+              ),
               const SizedBox(width: 6),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 350),
                 child: Text(
                   key: ValueKey(votedCount),
                   'You\'ve voted for $votedCount of $totalCount destinations',
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium
-                      ?.copyWith(fontWeight: FontWeight.w700, color: AppTheme.ink),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.ink,
+                  ),
                 ),
               ),
             ],

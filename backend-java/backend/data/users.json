@@ -1,0 +1,49 @@
+[ {
+  "id" : 1,
+  "username" : "Guest",
+  "email" : null,
+  "password" : null,
+  "groups" : [ ],
+  "created_at" : "2026-05-18T07:17:58.545570Z",
+  "last_login" : null
+}, {
+  "id" : 2,
+  "username" : "bang",
+  "email" : "bang@gmail.com",
+  "password" : "sha256:SzXO2FPiO2Sscrl6iw2yAw==:6O1L1YjBLu1fe7n4tFRwY2BpoxuComBhdYcA997HpS4=",
+  "groups" : [ {
+    "role" : "owner",
+    "code" : "TRVL-4462",
+    "group_id" : 1
+  }, {
+    "role" : "owner",
+    "code" : "TRVL-9514",
+    "group_id" : 2
+  }, {
+    "role" : "owner",
+    "code" : "TRVL-1046",
+    "group_id" : 3
+  } ],
+  "created_at" : "2026-05-18T07:35:11.043133Z",
+  "last_login" : "2026-05-18T08:50:28.351833400Z"
+}, {
+  "id" : 3,
+  "username" : "fang",
+  "email" : "fang@gmail.com",
+  "password" : "sha256:Wi4hs0R/f7s0A88/OSo4Cw==:qY6HzzjyLra4yBkFNPKORfIAHX7HiG94pWib2+0YjAw=",
+  "groups" : [ {
+    "role" : "owner",
+    "code" : "TRVL-4462",
+    "group_id" : 1
+  }, {
+    "role" : "owner",
+    "code" : "TRVL-9514",
+    "group_id" : 2
+  }, {
+    "role" : "owner",
+    "code" : "TRVL-1046",
+    "group_id" : 3
+  } ],
+  "created_at" : "2026-05-18T07:36:20.142686Z",
+  "last_login" : "2026-05-18T08:50:46.072875300Z"
+} ]

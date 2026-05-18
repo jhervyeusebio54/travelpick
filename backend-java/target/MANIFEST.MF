@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: com.travelpick.Main
+Class-Path: lib/jackson-annotations-2.17.1.jar lib/jackson-core-2.17.1.jar lib/jackson-databind-2.17.1.jar
+

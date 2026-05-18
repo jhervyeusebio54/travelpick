@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../services/api_service.dart';
 import '../services/auth_service.dart';
 import '../theme.dart';
 import '../widgets/animated_reveal.dart';
+import '../widgets/app_page_route.dart';
+import 'home_screen.dart';
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
@@ -17,6 +20,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  final _groupCodeController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
@@ -28,6 +32,7 @@ class _SignupScreenState extends State<SignupScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _groupCodeController.dispose();
     super.dispose();
   }
 
@@ -38,24 +43,49 @@ class _SignupScreenState extends State<SignupScreen> {
 
     setState(() => _isLoading = true);
     try {
+      final groupCode = _groupCodeController.text.trim();
       await AuthService.instance.signUp(
         name: _nameController.text,
         email: _emailController.text,
         password: _passwordController.text,
+        groupCode: groupCode.isEmpty ? null : groupCode,
       );
       if (!mounted) {
         return;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Account created! Log in to continue.'),
-        ),
-      );
-      Navigator.of(context).pop();
+      if (groupCode.isNotEmpty) {
+        try {
+          await ApiService.instance.joinGroup(groupCode);
+        } catch (_) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Account created. Could not join that group — check the code on Home.',
+                ),
+              ),
+            );
+          }
+        }
+      }
+
+      if (!mounted) {
+        return;
+      }
+
+      replaceWithAppPage(context, const HomeScreen());
     } on AuthException catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(error.message)),
+      );
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Sign up failed. Please try again.${error.toString().isNotEmpty ? ' ($error)' : ''}',
+          ),
+        ),
       );
     } finally {
       if (mounted) {
@@ -185,6 +215,18 @@ class _SignupScreenState extends State<SignupScreen> {
                           }
                           return null;
                         },
+                        onFieldSubmitted: (_) => _signUp(),
+                      ),
+                      const SizedBox(height: 14),
+                      TextFormField(
+                        controller: _groupCodeController,
+                        textCapitalization: TextCapitalization.characters,
+                        textInputAction: TextInputAction.done,
+                        decoration: const InputDecoration(
+                          labelText: 'Group Code (optional)',
+                          hintText: 'e.g. TRVL-4821',
+                          prefixIcon: Icon(Icons.tag_rounded),
+                        ),
                         onFieldSubmitted: (_) => _signUp(),
                       ),
                     ],
